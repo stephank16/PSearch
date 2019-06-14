@@ -19,6 +19,6 @@ FILE_PATTERN['cmip6'] = ['variable', 'table', 'model', 'experiment',
 
 ATTR['cmip6'] = ['tracking_id', 'contact']
 
-ELASTIC_par = [{'host': '192.168.178.43', 'port': 9200}]
+ELASTIC_par = [{'host': 'localhost', 'port': 9200}]
 
 FILE_READER = "netcdf4"   # currently xarray and netcdf4 supported

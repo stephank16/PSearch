@@ -13,7 +13,7 @@ import multiprocessing
 import xarray as xr
 from netCDF4 import Dataset
 
-from config import settings
+from .config import settings
 
 
 class SHelper():
