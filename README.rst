@@ -7,7 +7,7 @@ pindex
    :alt: Travis Build
 
 .. image:: https://img.shields.io/github/license/bird-house/twitcher.svg
-   :target: https://github.com/stephank16/PSearch/LICENSE.txt
+   :target: https://github.com/stephank16/PSearch/blob/master/LICENSE.txt
    :alt: GitHub licens
 
 
