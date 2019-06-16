@@ -16,7 +16,7 @@ from netCDF4 import Dataset
 from .config import settings
 
 
-class SHelper():
+class PROJ_Handler():
     """
 
     """
@@ -28,12 +28,24 @@ class SHelper():
         self.start_dir = start_dir
         self.epar = settings.ELASTIC_par
         self.file_reader = settings.FILE_READER
+        self.base_dirs = settings.BASE_DIRS[proj]
         #self.es = Elasticsearch(self.edict) # move out later ..
+        
+# move this out of this class later ... 
 
+    
     def get_es(self):
         es = Elasticsearch(self.epar)
         print("Elastic search endpoint: ",self.epar)
         return es
+
+    
+# to do: define a separate extraction handlers
+# - file_level_facets
+# - directory_level_facets
+# - netcdf metadata attribute level facets
+# - generic posix file level facets
+# - indexing status information facets 
 
     def match(self, path, file):
         """
@@ -62,10 +74,26 @@ class SHelper():
                 ratts[key] = getattr(data, key)
             data.close()
 
-        return(ratts)
+        return ratts
 
-    def worker(self, root, dirs, files):
-
+    
+    def get_posix(self,root,file):
+        ratts = {}
+        path = os.path.join(root,file)
+        
+        stat = os.sat(path)
+        
+        for key in self.POSIX:
+            ratts[key] = getattr(stat,key)
+        return ratts  
+    
+       
+        
+    def get_file_facets(self, root, dirs, files):
+        """
+        generate file facet dict based on project file facet template
+        (defined in config/settings.py)
+        """
         tdict = {}
         for mfile in files:
             tdict[mfile] = {}
@@ -81,6 +109,20 @@ class SHelper():
             tdict[mfile]['stime'] = tt[0]
             tdict[mfile]['etime'] = tt[1]
         return tdict
+    
+    
+    def get_dir_facets(self.root,dirs,files):
+        pass
+    
+    
+def cmip6_handler(start_dir,dset): 
+    """
+    generate facet index at datasetlevel
+    """
+    proj_handler = ProjHandler(proj="CMIP6",start_dir=start_dir)
+    
+    
+    
 
 
 def main():
