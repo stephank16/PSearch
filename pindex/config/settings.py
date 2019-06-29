@@ -6,7 +6,7 @@ T.
 ATTR = {}
 DIR_PATTERN = {}
 FILE_PATTERN = {}
-BASE_DIR = {}
+BASE_DIRS = {}
 
 # CMIP5
 DIR_PATTERN['cmip5'] = ['activity', 'product', 'institute', 'model',
@@ -24,7 +24,7 @@ FILE_PATTERN['cmip6'] = ['variable', 'table', 'model', 'experiment',
 
 ATTR['cmip6'] = ['tracking_id', 'contact']
 
-BASE_DIR['cmip6'] = "/work/ik1017/CMIP6/data/CMIP6"
+BASE_DIRS['cmip6'] = "/work/ik1017/CMIP6/data/CMIP6"
 
 # POSIX
 
@@ -37,5 +37,3 @@ STAT_PATTERN = ["stat.indtime","stat.extended"]
 ELASTIC_par = [{'host': 'localhost', 'port': 9200}]
 
 FILE_READER = "netcdf4"   # currently xarray and netcdf4 supported
-
-
