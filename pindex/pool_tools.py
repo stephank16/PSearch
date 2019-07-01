@@ -21,15 +21,17 @@ class PROJ_Handler():
 
     """
     def __init__(self, proj, start_dir=""):
-        self.dir_pattern = settings.DIR_PATTERN[proj]
-        self.file_pattern = settings.FILE_PATTERN[proj]
-        self.attr = settings.ATTR[proj]
+        self.dir_pattern = settings.DIR_PATTERN[proj].keys()
+        self.file_pattern = settings.FILE_PATTERN[proj].keys()
+        self.attr = settings.ATTR[proj].keys()
         self.proj = proj
         self.start_dir = start_dir
         self.epar = settings.ELASTIC_par
         self.file_reader = settings.FILE_READER
         self.base_dir = settings.BASE_DIRS[proj]
         self.posix = settings.POSIX_PATTERN
+        self.facets = settings.FACETS[proj]
+        self.es = {}
         if start_dir=="":
             self.base_dir = settings.BASE_DIRS[proj]
         else:
@@ -40,9 +42,31 @@ class PROJ_Handler():
 
 
     def get_es(self):
-        es = Elasticsearch(self.epar)
-        print("Elastic search endpoint: ",self.epar)
-        return es
+        if not bool(self.es):
+
+            _es = None
+            _es = Elasticsearch(self.epar)
+            if _es.ping():
+                self.es = _es
+                print('EL connected')
+                print("Elastic search endpoint: ",self.epar)
+            else:
+                print('ERROR: EL not connected')
+            return _es
+        else:
+            return self.es
+
+    def set_mapping(self):
+        if self.es.indices.exists(self.proj):
+            self.es.indices.delete(index=self.proj)
+            print("-- removed existing mapping")
+            
+        settings = {'mappings': {
+                              'properties': self.facets
+                              }
+                    }
+        self.es.indices.create(index='cmip6', ignore=400, body=settings)
+        print("-- mapping created")
 
 
 # to do: define a separate extraction handlers
@@ -142,6 +166,7 @@ def index(project,path):
     print("Project handler initialized:", cmip6_handler.start_dir)
     es = cmip6_handler.get_es()
     print(es)
+    cmip6_handler.set_mapping()
     walk = os.walk(cmip6_handler.start_dir)
     i = 0
     for root, dirs, files in walk:
