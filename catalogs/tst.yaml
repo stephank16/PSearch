@@ -1,0 +1,19 @@
+plugins:
+    source:
+        - module: intake_xarray
+
+
+sources:
+    test:
+        args:
+            urlpath: 
+               -   /mnt/lustre02/work/ik1017/CMIP6/data/CMIP6/CMIP/AWI/AWI-CM-1-1-MR/1pctCO2/r1i1p1f1/Amon/ta/gn/v20181218/ta_Amon_AWI-CM-1-1-MR_1pctCO2_r1i1p1f1_gn_185001-185012.nc
+        description: "CMIP6 test file"
+        driver: netcdf
+        metadata:   
+               item1: val1
+               item2: val2
+        tags:
+            - Amon
+            - model
+               
