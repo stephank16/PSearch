@@ -1,6 +1,13 @@
 """
+   Simple helpers for elasticsearch indexing of model data
 
-    ttt.
+   project specific settings are supported
+   
+   author: Stephan Kindermann
+   
+   version: 0.1
+   
+   date: feb 2020
 
 """
 
@@ -65,7 +72,7 @@ class PROJ_Handler():
                               'properties': self.facets
                               }
                     }
-        self.es.indices.create(index='cmip6', ignore=400, body=settings)
+        self.es.indices.create(index=self.proj, ignore=400, body=settings)
         print("-- mapping created")
 
 
@@ -162,19 +169,19 @@ def cmip6_handler(start_dir,dset):
 
 def index(project,path):
     # to do: parametrize with proj and path
-    cmip6_handler = PROJ_Handler("cmip6",path)
-    print("Project handler initialized:", cmip6_handler.start_dir)
-    es = cmip6_handler.get_es()
+    p_handler = PROJ_Handler(project,path)
+    print("Project handler initialized:", p_handler.start_dir)
+    es = p_handler.get_es()
     print(es)
-    cmip6_handler.set_mapping()
-    walk = os.walk(cmip6_handler.start_dir)
+    p_handler.set_mapping()
+    walk = os.walk(p_handler.start_dir)
     i = 0
     for root, dirs, files in walk:
         if len(files) > 0:
             print("=============================: ",root,dirs,files)
-            add = cmip6_handler.get_file_facets(root, dirs, files)
-            add = cmip6_handler.get_md(add,root,files)
-            add = cmip6_handler.get_posix(add,root,files)
+            add = p_handler.get_file_facets(root, dirs, files)
+            add = p_handler.get_md(add,root,files)
+            add = p_handler.get_posix(add,root,files)
             print(add)
 
             # update elastic search
@@ -183,7 +190,7 @@ def index(project,path):
                  i += 1
                  print("index update: ", i)
                  if len(i_dict) > 0:
-                    index_res = es.index(index='cmip6', id=i, body=i_dict)
+                    index_res = es.index(index=project, id=i, body=i_dict)
             print("============================")
 
 
