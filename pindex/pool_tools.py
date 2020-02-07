@@ -12,6 +12,7 @@
 """
 
 from elasticsearch import Elasticsearch
+from persistqueue import Queue
 import requests
 import json
 import os
@@ -38,6 +39,7 @@ class PROJ_Handler():
         self.base_dir = settings.BASE_DIRS[proj]
         self.posix = settings.POSIX_PATTERN
         self.facets = settings.FACETS[proj]
+        self.qprefix = settings.QUEUE_PREFIX
         self.es = {}
         if start_dir=="":
             self.base_dir = settings.BASE_DIRS[proj]
@@ -85,15 +87,17 @@ class PROJ_Handler():
 
     def match(self, file):
         """
-        Ttt.
-
-        B.
+        match file structure with file pattern
+        return dictionary - pattern_key, value 
+        
         """
         f_dict = {}
         file_name = file.split('.')[0]
         f_parts = file_name.split('_')
+        print(f_parts)
         if len(f_parts) < len(self.file_pattern):    # no time component
-            f_dict = dict(zip(self.file_pattern[:-1],f_parts))
+            print(self.file_pattern)
+            f_dict = dict(zip(list(self.file_pattern)[:-1],f_parts))
         else:
             f_dict = dict(zip(self.file_pattern, f_parts))
         return f_dict
@@ -146,9 +150,10 @@ class PROJ_Handler():
             # tdict[mfile][key]=val
         if len(files) > 0:
             tdict[mfile]['dataset_id'] = root
-            tt = tdict[mfile]['time'].split("-")
-            tdict[mfile]['stime'] = tt[0]
-            tdict[mfile]['etime'] = tt[1]
+            if 'time' in tdict[mfile]: 
+                tt = tdict[mfile]['time'].split("-")
+                tdict[mfile]['stime'] = tt[0]
+                tdict[mfile]['etime'] = tt[1]
         return tdict
 
 
@@ -161,7 +166,8 @@ def cmip6_handler(start_dir,dset):
     """
     generate facet index at datasetlevel
     """
-    proj_handler = ProjHandler(proj="CMIP6",start_dir=start_dir)
+    proj_handler = ProjHandler(proj="cmip6",start_dir=start_dir)
+    return proj_handler
 
 
 
@@ -192,6 +198,33 @@ def index(project,path):
                  if len(i_dict) > 0:
                     index_res = es.index(index=project, id=i, body=i_dict)
             print("============================")
+
+
+def tqueue(project,queue_id,path):
+    # to do: parametrize with proj and path
+    p_handler = PROJ_Handler(project,path)
+    print("Project handler initialized:", p_handler.start_dir)
+    q = Queue(settings.QUEUE_PREFIX+project+queue_id)
+
+    walk = os.walk(p_handler.start_dir)
+    i = 0
+    for root, dirs, files in walk:
+        if len(files) > 0:
+            print("=============================: ",root,dirs,files)
+            add = p_handler.get_file_facets(root, dirs, files)
+            add = p_handler.get_md(add,root,files)
+            add = p_handler.get_posix(add,root,files)
+            print(add)
+
+            # update elastic search
+            i_list = []
+            for item, i_dict in add.items():
+                 i += 1
+                 print("index update: ", i)
+                 if len(i_dict) > 0:
+                    q.put(i_dict) 
+            print("============================")
+
 
 
 if __name__ == "__main__":

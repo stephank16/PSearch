@@ -1,5 +1,10 @@
 """
-Tbd.
+ configuration for elastic-search facets to index
+ facet sources:
+     - directory structure
+     - file structure
+     - posix filesystem attributes
+     - attributes (read by opening the files using xarray or netcdf4)
 
 T.
 """
@@ -24,6 +29,12 @@ FILE_PATTERN['cmip5'] = {'variable':KEYWORD, 'table':KEYWORD,
                          'model':KEYWORD, 'experiment':KEYWORD,
                          'ensemble':KEYWORD, 'time':KEYWORD}
 
+BASE_DIRS['cmip5'] = "/work/kd0956/CMIP5/data/cmip5"   
+
+ATTR['cmip5'] = {'contact':TEXT}
+
+# -------------------------------------------
+
 # CMIP6
 DIR_PATTERN['cmip6'] = {'mip_era':KEYWORD, 'activity':KEYWORD,
                         'institution':KEYWORD, 'model':KEYWORD,
@@ -43,6 +54,8 @@ BASE_DIRS['cmip6'] = "/work/ik1017/CMIP6/data/CMIP6"
 
 POSIX_PATTERN = {"st_size":FLOAT,"st_atime":FLOAT,"st_mtime":FLOAT,"st_ctime":FLOAT}
 FACETS['cmip6']={'etime':INTEGER,'stime':INTEGER,'dataset_id':TEXT,'project':KEYWORD}
+
+# include update check later (file-structure, dir-structure consistency check)
 FACETS['cmip6'].update(FILE_PATTERN['cmip6'])
 FACETS['cmip6'].update(DIR_PATTERN['cmip6'])
 FACETS['cmip6'].update(ATTR['cmip6'])
@@ -54,3 +67,5 @@ STAT_PATTERN = ["stat.indtime","stat.extended"]
 ELASTIC_par = [{'host': 'localhost', 'port': 9200}]
 
 FILE_READER = "netcdf4"   # currently xarray and netcdf4 supported
+
+QUEUE_PREFIX = "/tmp/"     # prefix where persistent queue content is stored
